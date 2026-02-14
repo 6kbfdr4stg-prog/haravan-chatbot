@@ -39,7 +39,16 @@ class Chatbot:
 
             products = self.haravan.search_products(query_to_use, limit=3)
             if products:
-                product_list = "\n".join([f"- {p['title']}: {p['price']} VND" for p in products])
+                product_info = []
+                for p in products:
+                    info = f"- {p['title']}: {p['price']} VND"
+                    if p.get('variant_id'):
+                        # Generate Haravan Checkout Link
+                        checkout_link = f"{self.haravan.shop_url}/cart/{p['variant_id']}:1"
+                        info += f"\n  👉 Mua ngay: {checkout_link}"
+                    product_info.append(info)
+                
+                product_list = "\n".join(product_info)
                 context_data = f"Tìm thấy các sản phẩm sau cho từ khóa '{query_to_use}':\n{product_list}\nChi tiết: {json.dumps(products, ensure_ascii=False)}"
             else:
                 context_data = f"Không tìm thấy sản phẩm nào phù hợp với từ khóa '{query_to_use}'."

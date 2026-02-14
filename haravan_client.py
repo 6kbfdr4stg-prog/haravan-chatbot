@@ -35,10 +35,13 @@ class HaravanClient:
         # Get Images (limiting to top 10 as per video generator spec)
         images = [img['src'] for img in product.get('images', [])][:10]
         
-        # Get Price (from first variant)
+        # Get Price and Variant ID (from first variant)
         price = 0
+        variant_id = None
         if product.get('variants'):
-            price = product['variants'][0].get('price', 0)
+            variant = product['variants'][0]
+            price = variant.get('price', 0)
+            variant_id = variant.get('id')
             
         # Clean description (simple strip for now, might need HTML parsing later)
         description = product.get('body_html', '')
@@ -49,6 +52,7 @@ class HaravanClient:
             "title": product.get('title'),
             "description": description,
             "price": price,
+            "variant_id": variant_id,
             "images": images
         }
 
