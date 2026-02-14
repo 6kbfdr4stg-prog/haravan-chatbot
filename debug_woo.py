@@ -24,13 +24,18 @@ try:
             print(f"Images raw data: {json.dumps(p.get('images'), indent=2)}")
             print(f"Meta Data keys: {[m['key'] for m in p.get('meta_data', [])]}")
             
-            # Dump full meta data to see values
             print(json.dumps(p.get('meta_data', []), indent=2))
 
+            image_url = "No Image"
             if p.get("images") and len(p["images"]) > 0:
-                print(f"First Image SRC: {p['images'][0].get('src')}")
-            else:
-                print("No images found in standard field.")
+                image_url = p["images"][0].get('src')
+            elif p.get("meta_data"):
+                for meta in p["meta_data"]:
+                    if meta.get("key") == "_ext_featured_url" and meta.get("value"):
+                        image_url = meta["value"]
+                        break
+            
+            print(f"Final Image URL: {image_url}")
     else:
         print("No products returned.")
         print(products)

@@ -57,6 +57,11 @@ class WooCommerceClient:
                     "url": p["permalink"],
                     "description": p.get("short_description", "")
                 })
+            
+            # Sort results: Title match first, then others
+            query_lower = query.lower()
+            results.sort(key=lambda x: 0 if query_lower in x['title'].lower() else 1)
+            
             return results
         except Exception as e:
             print(f"WooCommerce Search Error: {e}")
