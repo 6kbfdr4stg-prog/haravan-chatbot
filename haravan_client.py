@@ -53,6 +53,7 @@ class HaravanClient:
             "description": description,
             "price": price,
             "variant_id": variant_id,
+            "handle": product.get('handle'),
             "images": images
         }
 

@@ -47,11 +47,28 @@ class Chatbot:
             if products:
                 product_info = []
                 for p in products:
-                    info = f"- {p['title']}: {p['price']} VND"
+                    # Format as HTML for the widget
+                    img_html = ""
+                    if p.get('images'):
+                        img_html = f'<img src="{p["images"][0]}" class="product-card-img" />'
+                    
+                    # Shorten description
+                    desc = p.get('description', '')
+                    if len(desc) > 100:
+                        desc = desc[:97] + "..."
+                    
+                    info = f"<b>{p['title']}</b><br/>Giá: {p['price']} VND<br/><i>{desc}</i>{img_html}"
+
+                    # Links
+                    links = []
+                    if p.get('handle'):
+                        links.append(f'<a href="https://mecobooks.com/products/{p["handle"]}" target="_blank">🔗 Xem chi tiết</a>')
                     if p.get('variant_id'):
-                        # Generate Haravan Checkout Link
-                        checkout_link = f"{self.haravan.shop_url}/cart/{p['variant_id']}:1"
-                        info += f"\n  👉 Mua ngay: {checkout_link}"
+                        links.append(f'<a href="https://mecobooks.com/cart/{p["variant_id"]}:1" target="_blank">👉 Mua ngay</a>')
+                    
+                    if links:
+                        info += "<br/>" + " | ".join(links)
+
                     product_info.append(info)
                 
                 product_list = "\n".join(product_info)

@@ -3,6 +3,7 @@
   #haravan-chat-widget-container * {
     box-sizing: border-box;
   }
+
   #haravan-chat-widget-btn {
     position: fixed;
     bottom: 20px;
@@ -12,21 +13,24 @@
     height: 60px;
     border-radius: 50%;
     background-color: #0084ff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s;
   }
+
   #haravan-chat-widget-btn:hover {
     transform: scale(1.05);
   }
+
   #haravan-chat-widget-btn svg {
     width: 32px;
     height: 32px;
     fill: white;
   }
+
   #haravan-chat-window {
     display: none;
     position: fixed;
@@ -37,12 +41,13 @@
     max-height: 80vh;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     z-index: 99999;
     flex-direction: column;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
+
   #haravan-chat-header {
     background: #0084ff;
     color: white;
@@ -52,6 +57,7 @@
     align-items: center;
     font-weight: 600;
   }
+
   #haravan-chat-close {
     cursor: pointer;
     font-size: 20px;
@@ -59,6 +65,7 @@
     border: none;
     color: white;
   }
+
   #haravan-chat-messages {
     flex: 1;
     padding: 16px;
@@ -68,6 +75,7 @@
     flex-direction: column;
     gap: 12px;
   }
+
   .h-message {
     max-width: 80%;
     padding: 10px 14px;
@@ -75,18 +83,21 @@
     font-size: 14px;
     line-height: 1.4;
   }
+
   .h-bot {
     background: white;
     color: #050505;
     align-self: flex-start;
     border-bottom-left-radius: 4px;
   }
+
   .h-user {
     background: #0084ff;
     color: white;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
   }
+
   #haravan-chat-input-area {
     padding: 12px;
     background: white;
@@ -94,6 +105,7 @@
     display: flex;
     gap: 8px;
   }
+
   #haravan-chat-input {
     flex: 1;
     padding: 10px;
@@ -102,6 +114,7 @@
     outline: none;
     font-size: 14px;
   }
+
   #haravan-chat-send {
     background: #0084ff;
     color: white;
@@ -111,10 +124,12 @@
     cursor: pointer;
     font-weight: 600;
   }
+
   #haravan-chat-send:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
+
   .h-typing {
     font-style: italic;
     font-size: 12px;
@@ -122,11 +137,20 @@
     margin-left: 10px;
     display: none;
   }
+
+  .product-card-img {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
 </style>
 
 <div id="haravan-chat-widget-container">
   <div id="haravan-chat-widget-btn" onclick="toggleHaravanChat()">
-    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+    <svg viewBox="0 0 24 24">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
+    </svg>
   </div>
 
   <div id="haravan-chat-window">
@@ -167,7 +191,8 @@
     const container = document.getElementById('haravan-chat-messages');
     const div = document.createElement('div');
     div.className = `h-message ${isUser ? 'h-user' : 'h-bot'}`;
-    div.innerText = text;
+    // User innerHTML to render links and images from bot
+    div.innerHTML = text;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
   }
@@ -179,7 +204,7 @@
 
     appendHMessage(text, true);
     input.value = '';
-    
+
     document.getElementById('h-typing').style.display = 'block';
     const sendBtn = document.getElementById('haravan-chat-send');
     sendBtn.disabled = true;
@@ -187,7 +212,7 @@
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
       });
       const data = await res.json();
