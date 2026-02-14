@@ -133,38 +133,29 @@ class Chatbot:
 
                 # 1. Generate HTML for the user (Widget)
                 product_html_list = []
-                for p in products[:3]: # Limit to 3 for web widget
-                    img_html = ""
-                    if p.get('image'):
-                        img_html = f'<img src="{p["image"]}" class="product-card-img" />'
+                for p in products[:5]: # increased limit slightly as cards are compact
+                    image_url = p.get('image') or "https://placehold.co/80x80?text=No+Img"
                     
-                    desc = p.get('description', '')
-                    if len(desc) > 100:
-                        desc = desc[:97] + "..."
-                    
-                    # Product Card HTML
-                    card = f"<div style='margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; background-color: #f9f9f9;'>"
-                    card += f"<div style='font-size: 15px; font-weight: bold; margin-bottom: 4px;'>{p['title']}</div>"
-                    card += f"<div style='color: #d32f2f; font-weight: bold; margin-bottom: 8px;'>{p['price']}₫</div>"
-                    
-                    if img_html:
-                        card += f"<div style='margin-bottom: 8px;'>{img_html}</div>"
-                        
-                    card += f"<div style='font-size: 13px; color: #555; margin-bottom: 10px;'>{desc}</div>"
-                    
-                    # Links
-                    links = []
-                    links.append(f'<a href="{p["url"]}" target="_blank" style="color: #0084ff; text-decoration: none; font-weight: 500;">🔗 Chi tiết</a>')
-                    links.append(f'<a href="{p["url"]}" target="_blank" style="color: #d32f2f; font-weight: bold; text-decoration: none;">👉 Mua ngay</a>')
-                    
-                    if links:
-                         card += "<div style='margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; display: flex; gap: 15px;'>" + "".join(links) + "</div>"
-                    
-                    card += "</div>"
+                    # Horizontal Card HTML
+                    card = f"""
+                    <div class="h-product-card">
+                        <div class="h-product-image-container">
+                            <img src="{image_url}" class="h-product-image" alt="{p['title']}">
+                        </div>
+                        <div class="h-product-info">
+                            <div class="h-product-title" title="{p['title']}">{p['title']}</div>
+                            <div class="h-product-price">{p['price']}₫</div>
+                            <div class="h-product-actions">
+                                <a href="{p['url']}" target="_blank" class="h-btn h-btn-view">Xem</a>
+                                <a href="{p['url']}" target="_blank" class="h-btn h-btn-buy">Mua</a>
+                            </div>
+                        </div>
+                    </div>
+                    """
                     product_html_list.append(card)
                 
                 final_html_output = "".join(product_html_list)
-
+                
                 # 2. Generate Text Context for LLM
                 product_text_summary = "\n".join([f"- {p['title']} ({p['price']}d): {p.get('description', '')[:150]}..." for p in products])
                 context_data = f"Hệ thống đã tìm thấy các sản phẩm sau từ Mecobooks:\n{product_text_summary}"
