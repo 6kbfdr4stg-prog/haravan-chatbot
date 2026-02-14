@@ -8,11 +8,24 @@ class Chatbot:
         # self.haravan = HaravanClient()
         self.woo = WooCommerceClient()
         self.llm = LLMService()
-        self.system_prompt = """
+        # Load Knowledge Base
+        try:
+            with open("knowledge_base.txt", "r", encoding="utf-8") as f:
+                self.knowledge_base = f.read()
+        except FileNotFoundError:
+            self.knowledge_base = "Chưa có thông tin cửa hàng."
+
+        self.system_prompt = f"""
         Bạn là trợ lý ảo AI của "Tiệm Sách Anh Tuấn".
-        Nhiệm vụ của bạn là hỗ trợ khách hàng tìm kiếm sách và kiểm tra đơn hàng.
-        Luôn trả lời thân thiện, lịch sự và ngắn gọn bang Tiếng Việt.
-        Nếu có thông tin sản phẩm, hãy hiển thị giá và mô tả ngắn gọn.
+        Nhiệm vụ của bạn là hỗ trợ khách hàng tìm kiếm sách, kiểm tra đơn hàng và giải đáp thắc mắc.
+        
+        THÔNG TIN CỬA HÀNG & CHÍNH SÁCH:
+        {self.knowledge_base}
+        
+        HƯỚNG DẪN TRẢ LỜI:
+        1. Luôn thân thiện, lịch sự, xưng "mình" hoặc "shop".
+        2. Nếu khách hỏi thông tin có trong phần CHÍNH SÁCH, hãy trả lời chính xác theo đó.
+        3. Nếu khách tìm sách, hãy hiển thị giá và mô tả ngắn gọn nếu có.
         """
 
     def determine_intent(self, message):
