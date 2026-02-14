@@ -8,3 +8,4 @@ woocommerce
 thefuzz
 unidecode
 Pillow
+python-multipart
