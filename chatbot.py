@@ -40,8 +40,42 @@ class Chatbot:
             return "check_order"
         return "general_chat"
 
-    def process_message(self, user_message, platform="web"):
-        intent = self.determine_intent(user_message)
+    def process_message(self, user_message, platform="web", image_url=None):
+        import requests
+        from PIL import Image
+        from io import BytesIO
+
+        intent = "general_chat"
+        
+        # 0. Handle Image Input first (Visual Search)
+        if image_url:
+            intent = "search_product"
+            # Download image
+            try:
+                print(f"Downloading image from: {image_url}")
+                img_response = requests.get(image_url)
+                img = Image.open(BytesIO(img_response.content))
+                
+                # Ask LLM to identify the book
+                vision_prompt = """
+                Hãy nhìn vào bức ảnh này và xác định tên cuốn sách và tác giả (nếu có).
+                Chỉ trả về Tên Sách + Tác Giả. Không cần giải thích thêm.
+                Ví dụ: "Nhà Giả Kim - Paulo Coelho"
+                """
+                
+                recognized_text = self.llm.generate_response(vision_prompt, image_data=img)
+                print(f"AI recognized: {recognized_text}")
+                
+                # Use the recognized text as the search query
+                user_message = recognized_text.strip()
+                
+            except Exception as e:
+                print(f"Image processing error: {e}")
+                return "Xin lỗi, mình không đọc được ảnh này. Bạn thử nhập tên sách giúp mình nhé!"
+
+        if not image_url:
+            intent = self.determine_intent(user_message)
+        
         context_data = ""
 
         if intent == "search_product":

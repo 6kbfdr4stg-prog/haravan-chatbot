@@ -14,10 +14,19 @@ class LLMService:
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-2.0-flash')
 
-    def generate_response(self, prompt):
-        """Generates a response from the LLM."""
+    def generate_response(self, prompt, image_data=None):
+        """
+        Generates a response from the LLM.
+        :param prompt: Text prompt
+        :param image_data: Optional PIL Image object or bytes
+        """
         try:
-            response = self.model.generate_content(prompt)
+            if image_data:
+                # Multimodal request
+                response = self.model.generate_content([prompt, image_data])
+            else:
+                # Text-only request
+                response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
             print(f"Error calling Gemini API: {e}")

@@ -83,13 +83,22 @@ async def fb_webhook(request: Request):
                     sender_id = event["sender"]["id"]
                     message_text = event["message"].get("text")
                     
-                    if message_text:
+                    if message_text or event["message"].get("attachments"):
                         # Process message with Chatbot
                         response_data = "Xin lỗi, chatbot chưa sẵn sàng."
                         if bot:
                             try:
+                                # Extract image URL if present
+                                image_url = None
+                                attachments = event["message"].get("attachments", [])
+                                if attachments:
+                                    for att in attachments:
+                                        if att["type"] == "image":
+                                            image_url = att["payload"]["url"]
+                                            break
+                                
                                 # Use platform="facebook" to get structured data
-                                response_data = bot.process_message(message_text, platform="facebook")
+                                response_data = bot.process_message(message_text, platform="facebook", image_url=image_url)
                             except Exception as e:
                                 print(f"Bot Error: {e}")
                                 response_data = "Có lỗi xảy ra khi xử lý tin nhắn."

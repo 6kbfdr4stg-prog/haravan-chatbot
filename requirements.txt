@@ -7,3 +7,4 @@ a2wsgi
 woocommerce
 thefuzz
 unidecode
+Pillow
