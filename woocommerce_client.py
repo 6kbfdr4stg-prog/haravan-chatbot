@@ -34,7 +34,7 @@ class WooCommerceClient:
             results = []
             for p in products:
                 # Extract image
-                image_url = ""
+                image_url = "https://placehold.co/300x300?text=No+Image" # Default fallback
                 if p.get("images") and len(p["images"]) > 0:
                     image_url = p["images"][0]["src"]
                 
