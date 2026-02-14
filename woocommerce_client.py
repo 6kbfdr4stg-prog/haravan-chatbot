@@ -73,7 +73,14 @@ class WooCommerceClient:
                 # Clean description (remove HTML tags if needed, or keep for web)
                 # For simplicity, we just take the name and price for now
                 
-                # Extract stock info
+                # Safely extract price
+                try:
+                    price_val = int(float(p.get('price') or 0))
+                    price_fmt = f"{price_val:,}"
+                except (ValueError, TypeError):
+                    price_fmt = "0"
+
+                # Extract stock info safely
                 stock_status = p.get("stock_status", "instock") 
                 stock_quantity = p.get("stock_quantity")
                 
@@ -86,10 +93,10 @@ class WooCommerceClient:
                      inventory_text = f"Còn {stock_quantity}"
 
                 results.append({
-                    "title": p["name"],
-                    "price": f"{int(float(p['price'] or 0)):,}", # Format 100000 -> 100,000
+                    "title": p.get("name", "Sản phẩm không tên"),
+                    "price": price_fmt,
                     "image": image_url,
-                    "url": p["permalink"],
+                    "url": p.get("permalink", "#"),
                     "description": p.get("short_description", ""),
                     "stock_status": stock_status,
                     "inventory_text": inventory_text
