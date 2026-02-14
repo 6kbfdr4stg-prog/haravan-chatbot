@@ -62,7 +62,9 @@ async def fb_verify(request: Request):
     if mode and token:
         if mode == "subscribe" and token == FB_VERIFY_TOKEN:
             print("WEBHOOK_VERIFIED")
-            return int(challenge)
+        if mode == "subscribe" and token == FB_VERIFY_TOKEN:
+            print("WEBHOOK_VERIFIED")
+            return Response(content=challenge, media_type="text/plain")
         else:
             raise HTTPException(status_code=403, detail="Verification failed")
     return {"status": "waiting_for_facebook"}
