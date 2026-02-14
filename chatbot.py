@@ -45,34 +45,58 @@ class Chatbot:
 
             products = self.haravan.search_products(query_to_use, limit=3)
             if products:
-                product_info = []
+                # 1. Generate HTML for the user (Widget)
+                product_html_list = []
                 for p in products:
-                    # Format as HTML for the widget
                     img_html = ""
                     if p.get('images'):
                         img_html = f'<img src="{p["images"][0]}" class="product-card-img" />'
                     
-                    # Shorten description
                     desc = p.get('description', '')
                     if len(desc) > 100:
                         desc = desc[:97] + "..."
                     
-                    info = f"<b>{p['title']}</b><br/>Giá: {p['price']} VND<br/><i>{desc}</i>{img_html}"
-
+                    # Product Card HTML
+                    card = f"<div style='margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;'>"
+                    card += f"<b>{p['title']}</b><br/>"
+                    card += f"<span style='color: #d32f2f; font-weight: bold;'>{p['price']}₫</span><br/>"
+                    card += f"<i style='font-size: 12px; color: #555;'>{desc}</i>"
+                    card += img_html
+                    
                     # Links
                     links = []
                     if p.get('handle'):
-                        links.append(f'<a href="https://mecobooks.com/products/{p["handle"]}" target="_blank">🔗 Xem chi tiết</a>')
+                        links.append(f'<a href="https://mecobooks.com/products/{p["handle"]}" target="_blank" style="color: #0084ff; text-decoration: none;">🔗 Chi tiết</a>')
                     if p.get('variant_id'):
-                        links.append(f'<a href="https://mecobooks.com/cart/{p["variant_id"]}:1" target="_blank">👉 Mua ngay</a>')
+                        links.append(f'<a href="https://mecobooks.com/cart/{p["variant_id"]}:1" target="_blank" style="color: #d32f2f; font-weight: bold; text-decoration: none;">👉 Mua ngay</a>')
                     
                     if links:
-                        info += "<br/>" + " | ".join(links)
-
-                    product_info.append(info)
+                         card += "<br/><div style='margin-top: 5px;'>" + " | ".join(links) + "</div>"
+                    
+                    card += "</div>"
+                    product_html_list.append(card)
                 
-                product_list = "\n".join(product_info)
-                context_data = f"Tìm thấy các sản phẩm sau cho từ khóa '{query_to_use}':\n{product_list}\nChi tiết: {json.dumps(products, ensure_ascii=False)}"
+                final_html_output = "".join(product_html_list)
+
+                # 2. Generate Text Context for LLM (so it knows what was returned)
+                product_text_summary = "\n".join([f"- {p['title']} ({p['price']}d)" for p in products])
+                context_data = f"Hệ thống đã tìm thấy các sản phẩm sau:\n{product_text_summary}"
+                
+                # 3. Get a short intro from LLM
+                intro_prompt = f"""
+                {self.system_prompt}
+                Người dùng muốn tìm: "{query_to_use}"
+                Hệ thống tìm thấy:
+                {product_text_summary}
+                
+                Hãy viết một câu giới thiệu ngắn gọn, thân thiện (dưới 20 từ) để mời khách xem danh sách bên dưới. 
+                Ví dụ: "Dạ, shop tìm thấy vài cuốn sách phù hợp với bạn ạ:"
+                """
+                llm_intro = self.llm.generate_response(intro_prompt)
+                
+                # 4. Combine Intro + HTML
+                return f"{llm_intro}<br/><br/>{final_html_output}"
+
             else:
                 context_data = f"Không tìm thấy sản phẩm nào phù hợp với từ khóa '{query_to_use}'."
 
