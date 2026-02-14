@@ -425,27 +425,30 @@
     sendBtn.disabled = true;
 
     try {
-      let res;
-      let data;
+      const formData = new FormData();
+      // If there's text, send it. If only image, send placeholder text "Gửi ảnh" so backend validation passes
+      // If there's text AND image, send the text.
+      let messageContent = text;
+      if (!text && selectedImageFile) {
+        messageContent = "Gửi ảnh";
+      }
+
+      formData.append('message', messageContent);
 
       if (currentImageFile) {
-        const formData = new FormData();
-        formData.append('message', text || "Gửi ảnh"); // Ensure message is not empty string if sending image only
         formData.append('file', currentImageFile);
-
-        res = await fetch(IMAGE_UPLOAD_API_URL, {
-          method: 'POST',
-          body: formData
-        });
-        data = await res.json();
-      } else {
-        res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
-        });
-        data = await res.json();
       }
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
       appendHMessage(data.response, false);
     } catch (err) {
       console.error(err);
