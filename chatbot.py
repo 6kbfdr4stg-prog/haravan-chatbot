@@ -25,7 +25,7 @@ class Chatbot:
             return "check_order"
         return "general_chat"
 
-    def process_message(self, user_message):
+    def process_message(self, user_message, platform="web"):
         intent = self.determine_intent(user_message)
         context_data = ""
 
@@ -43,15 +43,44 @@ class Chatbot:
             # If query is empty after cleaning, use original or prompt user (using original for now)
             query_to_use = clean_query if clean_query else user_message
 
-            products = self.haravan.search_products(query_to_use, limit=3)
+            products = self.haravan.search_products(query_to_use, limit=5) # Increase limit for carousel
             if products:
+                if platform == "facebook":
+                    # Return list of elements for Generic Template
+                    elements = []
+                    for p in products:
+                        element = {
+                            "title": p['title'],
+                            "subtitle": f"{p['price']} VND",
+                            "image_url": p['images'][0] if p.get('images') else "",
+                            "buttons": []
+                        }
+                        
+                        if p.get('handle'):
+                            element["buttons"].append({
+                                "type": "web_url",
+                                "url": f"https://mecobooks.com/products/{p['handle']}",
+                                "title": "Xem chi tiết"
+                            })
+                        
+                        if p.get('variant_id'):
+                            element["buttons"].append({
+                                "type": "web_url",
+                                "url": f"https://mecobooks.com/cart/{p['variant_id']}:1",
+                                "title": "Mua ngay"
+                            })
+                        
+                        elements.append(element)
+                    return elements
+
                 # 1. Generate HTML for the user (Widget)
                 product_html_list = []
-                for p in products:
+                for p in products[:3]: # Limit to 3 for web widget to avoid scrolling too much
                     img_html = ""
                     if p.get('images'):
                         img_html = f'<img src="{p["images"][0]}" class="product-card-img" />'
                     
+                    desc = p.get('description', '')
                     if len(desc) > 100:
                         desc = desc[:97] + "..."
                     

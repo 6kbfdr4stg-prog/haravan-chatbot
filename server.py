@@ -83,24 +83,25 @@ async def fb_webhook(request: Request):
                     
                     if message_text:
                         # Process message with Chatbot
-                        response_text = "Xin lỗi, chatbot chưa sẵn sàng."
+                        response_data = "Xin lỗi, chatbot chưa sẵn sàng."
                         if bot:
                             try:
-                                response_text = bot.process_message(message_text)
+                                # Use platform="facebook" to get structured data
+                                response_data = bot.process_message(message_text, platform="facebook")
                             except Exception as e:
                                 print(f"Bot Error: {e}")
-                                response_text = "Có lỗi xảy ra khi xử lý tin nhắn."
+                                response_data = "Có lỗi xảy ra khi xử lý tin nhắn."
 
                         # Send response back to Facebook
-                        send_fb_message(sender_id, response_text)
+                        send_fb_message(sender_id, response_data)
         
         return Response(content="EVENT_RECEIVED", status_code=200)
     else:
         raise HTTPException(status_code=404, detail="Not a page event")
 
-def send_fb_message(recipient_id, text):
+def send_fb_message(recipient_id, message_data):
     """
-    Send text message back to Facebook User.
+    Send text or structured message back to Facebook User.
     """
     if not FB_PAGE_ACCESS_TOKEN:
         print("Missing FB_PAGE_ACCESS_TOKEN")
@@ -108,10 +109,27 @@ def send_fb_message(recipient_id, text):
 
     url = f"https://graph.facebook.com/v22.0/me/messages?access_token={FB_PAGE_ACCESS_TOKEN}"
     headers = {"Content-Type": "application/json"}
+    
     payload = {
-        "recipient": {"id": recipient_id},
-        "message": {"text": text}
+        "recipient": {"id": recipient_id}
     }
+
+    if isinstance(message_data, str):
+         payload["message"] = {"text": message_data}
+    elif isinstance(message_data, list):
+        # Generic Template (Carousel)
+        payload["message"] = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": message_data
+                }
+            }
+        }
+    else:
+        print(f"Unknown message type: {type(message_data)}")
+        return
     
     try:
         r = requests.post(url, headers=headers, json=payload)
