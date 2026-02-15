@@ -72,18 +72,32 @@ class Chatbot:
 
         if img:
             try:
-                # Ask LLM to identify the book
+                # Ask LLM to identify the book(s)
                 vision_prompt = """
-                Hãy nhìn vào bức ảnh này và xác định tên cuốn sách và tác giả (nếu có).
-                Chỉ trả về Tên Sách + Tác Giả. Không cần giải thích thêm.
-                Ví dụ: "Nhà Giả Kim - Paulo Coelho"
+                Hãy nhìn vào bức ảnh này và xác định tên các cuốn sách có trong ảnh (hoặc danh sách sách).
+                Yêu cầu:
+                1. Trả về tên các cuốn sách, mỗi cuốn một dòng riêng biệt.
+                2. Không thêm số thứ tự, dấu gạch đầu dòng hay giải thích.
+                3. Nếu là danh sách văn bản, hãy trích xuất chính xác tên sách.
+                
+                Ví dụ output:
+                Nhà Giả Kim
+                Đắc Nhân Tâm
+                Tuổi Trẻ Đáng Giá Bao Nhiêu
                 """
                 
                 recognized_text = self.llm.generate_response(vision_prompt, image_data=img)
                 print(f"AI recognized: {recognized_text}")
                 
-                # Use the recognized text as the search query
-                user_message = recognized_text.strip()
+                # Check if multiple lines (list of books)
+                lines = [line.strip() for line in recognized_text.split('\n') if line.strip()]
+                
+                if len(lines) > 1:
+                    user_message = "COMBOS_SEARCH::" + "||".join(lines)
+                else:
+                    # Use the recognized text as the search query
+                    user_message = recognized_text.strip()
+
             except Exception as e:
                  print(f"LLM Vision Error: {e}")
                  return "Xin lỗi, mình chưa nhận diện được sách trong ảnh."
@@ -93,19 +107,50 @@ class Chatbot:
         
         context_data = ""
 
-        if intent == "search_product":
-            # Extract basic query
-            # Remove common keywords to get the actual product name
-            stop_words = ["tìm", "kiếm", "mua", "giá", "sách", "cuốn", "quyển", "tập", "bộ", "của", "các", "những", "bao nhiêu", "là", "gì", "ở", "đâu"]
-            clean_query = user_message.lower()
-            for word in stop_words:
-                clean_query = clean_query.replace(word, "")
-            
-            clean_query = clean_query.strip()
-            query_to_use = clean_query if clean_query else user_message
+        if intent == "search_product" or user_message.startswith("COMBOS_SEARCH::"):
+            # Clean Search Logic
+            products = []
+            query_for_context = user_message
 
-            # Search products using WooCommerce
-            products = self.woo.search_products(query_to_use, limit=5)
+            if user_message.startswith("COMBOS_SEARCH::"):
+                # Handle Multi-book Search
+                raw_list = user_message.replace("COMBOS_SEARCH::", "").split("||")
+                query_for_context = ", ".join(raw_list)
+                print(f"Searching for list ({len(raw_list)} items): {raw_list}")
+                
+                # Search top 4 items to avoid overload
+                for item_title in raw_list[:4]: 
+                    # Strip authors in brackets if common format (Name - Author) or (Name (Author))
+                    clean_title = item_title.split('(')[0].split('-')[0].strip()
+                    found = self.woo.search_products(clean_title, limit=1)
+                    if found:
+                        products.extend(found)
+            else:
+                # Standard Single Search
+                stop_words = ["tìm", "kiếm", "mua", "giá", "sách", "cuốn", "quyển", "tập", "bộ", "của", "các", "những", "bao nhiêu", "là", "gì", "ở", "đâu"]
+                clean_query = user_message.lower()
+                for word in stop_words:
+                    clean_query = clean_query.replace(word, "")
+                
+                clean_query = clean_query.strip()
+                query_to_use = clean_query if clean_query else user_message
+                query_for_context = query_to_use
+                
+                # Search products using WooCommerce
+                products = self.woo.search_products(query_to_use, limit=5)
+            
+            # Common Result Handling
+            if products:
+                # Deduplicate based on ID just in case
+                seen_ids = set()
+                unique_products = []
+                for p in products:
+                    if p['id'] not in seen_ids:
+                        unique_products.append(p)
+                        seen_ids.add(p['id'])
+                products = unique_products
+
+                if platform == "facebook":
             if products:
                 if platform == "facebook":
                     # Return list of elements for Generic Template
@@ -168,7 +213,7 @@ class Chatbot:
                 
                 # Update System Prompt to ask for formatting
                 prompt = f"""
-                Khách hàng đang tìm: "{query_to_use}"
+                Khách hàng đang tìm: "{query_for_context}"
                 
                 Dưới đây là danh sách sản phẩm tìm được:
                 {product_text_summary}
