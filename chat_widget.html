@@ -295,16 +295,15 @@
 </style>
 
 <div id="haravan-chat-widget-container">
-  <div id="haravan-chat-widget-btn" onclick="toggleHaravanChat()">
-    <svg viewBox="0 0 24 24">
-      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path>
-    </svg>
+  <div id="haravan-chat-widget-btn">
+    <img src="https://cdn-icons-png.flaticon.com/512/724/724715.png" alt="Chat"
+      style="width: 30px; height: 30px; filter: brightness(0) invert(1);">
   </div>
 
   <div id="haravan-chat-window">
     <div id="haravan-chat-header">
       <span>Trợ lý ảo</span>
-      <button id="haravan-chat-close" onclick="toggleHaravanChat()">✕</button>
+      <button id="haravan-chat-close">✕</button>
     </div>
     <div id="haravan-chat-messages">
       <div class="h-message h-bot">Xin chào! Tôi có thể giúp gì cho bạn hôm nay?</div>
@@ -323,9 +322,8 @@
 
       <!-- Upload Button -->
       <button id="haravan-upload-btn">📎</button>
-
-      <input type="text" id="haravan-chat-input" placeholder="Nhập tin nhắn..." onkeypress="handleHKeyPress(event)">
-      <button id="haravan-chat-send" onclick="sendHMessage()">➤</button>
+      <input type="text" id="haravan-chat-input" placeholder="Nhập tin nhắn...">
+      <button id="haravan-chat-send">➤</button>
     </div>
   </div>
 </div>
