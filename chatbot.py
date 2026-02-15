@@ -178,7 +178,8 @@ class Chatbot:
                 Không cần lặp lại giá tiền nếu không cần thiết.
                 """
                 
-                response_text = self.llm.generate_response(prompt, system_instruction=self.system_prompt)
+                full_prompt_with_system = f"{self.system_prompt}\n\n{prompt}"
+                response_text = self.llm.generate_response(full_prompt_with_system)
                 
                 return f"{response_text}<br/><br/>{final_html_output}"
             else:
