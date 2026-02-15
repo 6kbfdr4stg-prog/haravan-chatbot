@@ -339,6 +339,15 @@
   const haravanImagePreview = document.getElementById('haravan-image-preview');
   const haravanRemoveImageBtn = document.getElementById('haravan-remove-image-btn');
 
+  // Add Event Listeners (Fix for inline onclick warnings)
+  document.getElementById('haravan-chat-widget-btn').addEventListener('click', toggleHaravanChat);
+  document.getElementById('haravan-chat-close').addEventListener('click', toggleHaravanChat);
+  document.getElementById('haravan-chat-send').addEventListener('click', sendHMessage);
+
+  document.getElementById('haravan-chat-input').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sendHMessage();
+  });
+
   let selectedImageFile = null;
 
   function toggleHaravanChat() {
