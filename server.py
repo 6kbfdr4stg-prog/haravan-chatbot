@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request, Response, Form, File, Uploa
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from chatbot import Chatbot
+from ai_agents.sales_support import SalesSupportAgent
 import uvicorn
 import os
 import requests
@@ -18,9 +18,9 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# Initialize Chatbot
+# Initialize Chatbot (Agent)
 try:
-    bot = Chatbot()
+    bot = SalesSupportAgent()
 except Exception as e:
     print(f"Failed to initialize chatbot: {e}")
     bot = None

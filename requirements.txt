@@ -1,11 +1,11 @@
 fastapi
 uvicorn
 requests
-google-generativeai
 python-dotenv
-a2wsgi
+schedule
 woocommerce
-thefuzz
+google-generativeai
 unidecode
-Pillow
+thefuzz
+jinja2
 python-multipart

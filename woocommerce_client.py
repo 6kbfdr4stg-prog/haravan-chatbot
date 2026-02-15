@@ -1,6 +1,9 @@
 from woocommerce import API
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class WooCommerceClient:
     def __init__(self):
@@ -92,6 +95,9 @@ class WooCommerceClient:
                 elif stock_quantity is not None:
                      inventory_text = f"Còn {stock_quantity}"
 
+                # Extract sales data
+                total_sales = p.get("total_sales", 0)
+
                 results.append({
                     "title": p.get("name", "Sản phẩm không tên"),
                     "price": price_fmt,
@@ -99,7 +105,8 @@ class WooCommerceClient:
                     "url": p.get("permalink", "#"),
                     "description": p.get("short_description", ""),
                     "stock_status": stock_status,
-                    "inventory_text": inventory_text
+                    "inventory_text": inventory_text,
+                    "total_sales": total_sales
                 })
             
             
