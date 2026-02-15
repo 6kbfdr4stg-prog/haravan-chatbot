@@ -165,6 +165,17 @@ async def get_widget():
     except FileNotFoundError:
         return "Widget file not found."
 
+@app.get("/widget-loader", response_class=Response)
+async def get_widget_loader():
+    """
+    Serves the Widget Loader JS.
+    """
+    try:
+        with open("widget_loader.js", "r", encoding="utf-8") as f:
+            return Response(content=f.read(), media_type="application/javascript")
+    except FileNotFoundError:
+        return Response(content="console.error('Widget loader not found');", media_type="application/javascript")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
